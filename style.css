@@ -1,0 +1,332 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+/* General Body Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f0f2f5; /* A softer background color */
+    color: #333;
+    margin: 0;
+}
+
+header {
+    background: #004d40; /* Dark teal */
+    color: white;
+    padding: 1rem 2rem;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-bottom: 3px solid #00796b;
+}
+
+header h1 {
+    margin: 0;
+    font-weight: 600;
+}
+
+main {
+    padding: 20px;
+}
+
+/* Zone Title Styles */
+/* REVISED .zone-title rule */
+.zone-title {
+    color: #555;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 5px;
+    margin: 0 0 15px 0; /* Adjusted margins */
+}
+
+/* REVISED #er-board rule */
+#er-board {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* This will create space between the zone containers */
+}
+/* Improved Bed Card Styles */
+/* Find the .bed rule in style.css and REPLACE it with this */
+/* Find the .bed rule in style.css and REPLACE it with this updated version */
+.bed {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    padding: 20px;
+    border-left: 6px solid;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    max-width: 450px; 
+    /* The 'margin: 0 auto;' line has been removed */
+}
+/* ADD this new .bed-grid rule */
+.bed-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+.bed:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+/* Find the .bed-header rule and REPLACE it with this */
+.bed-header {
+    font-size: 1.3rem;
+    font-weight: 700;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    color: inherit; /* NEW: This will inherit the color from the .bed container */
+}
+
+.bed-info p {
+    margin: 10px 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+}
+
+.bed-info p i {
+    color: #00796b; /* Icon color */
+    margin-right: 12px;
+    width: 20px; /* Align icons nicely */
+    text-align: center;
+}
+
+.bed-info p strong {
+    font-weight: 600;
+    margin-right: 8px;
+    color: #555;
+}
+
+.vacant .bed-info p {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #777;
+}
+
+/* --- ZONE COLORS (with updated Resus color and themed text) --- */
+.resus-zone { 
+    border-left-color: #b71c1c; 
+    background-color: #ffebee;
+    color: #b71c1c; /* Text color for this zone */
+}
+.red-zone { 
+    border-left-color: #d32f2f;
+    color: #d32f2f;
+}
+.yellow-zone { 
+    border-left-color: #fbc02d; 
+    color: #f9a825;
+}
+.holding-bay { 
+    border-left-color: #7b1fa2;
+    color: #7b1fa2;
+}
+
+
+/* Action Buttons with Icons */
+.action-buttons {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    flex-grow: 1;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.action-btn:hover {
+    opacity: 0.9;
+}
+
+.action-btn.discharge { background-color: #d32f2f; } /* Changed to Red */
+.action-btn.admit { background-color: #303f9f; } /* Changed to Indigo */
+
+
+/* Modal Styles */
+.modal {
+    display: none; 
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px);
+}
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 30px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 550px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+#patient-form input, #patient-form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+}
+#patient-form button {
+    background-color: #00796b;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+}
+/* ADD this to the bottom of style.css */
+
+/* Navigation Styles */
+header nav {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.nav-btn {
+    background-color: transparent;
+    border: 1px solid #ffffff80;
+    color: #ffffffc0;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+    background-color: #ffffff20;
+    color: #ffffff;
+}
+
+.nav-btn.active {
+    background-color: #ffffff;
+    color: #004d40;
+    border-color: #ffffff;
+}
+
+/* List View & Table Styles */
+.view-container {
+    padding: 0 20px;
+}
+
+.view-container h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.table-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    overflow-x: auto; /* For responsiveness on small screens */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+thead {
+    background-color: #f8f9fa;
+}
+
+th {
+    font-weight: 600;
+    color: #555;
+}
+
+tbody tr:hover {
+    background-color: #f0f2f5;
+}
+/* ADD this to the bottom of style.css */
+
+.action-btn.transfer { background-color: #0277bd; } /* Light Blue */
+.action-btn.lama { background-color: #f57c00; } /* Orange */
+.action-btn.dor { background-color: #ef6c00; } /* Darker Orange */
+/* ADD THIS TO THE BOTTOM OF style.css */
+
+.nav-btn.sign-out {
+    background-color: #c62828;
+    border-color: #c62828;
+    color: white;
+    margin-left: 20px; /* Add some space */
+}
+
+.nav-btn.sign-out:hover {
+    background-color: #b71c1c;
+}
+/* ADD THIS TO THE BOTTOM OF style.css */
+
+/* List Header and Search Bar Styles */
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.list-header h2 {
+    margin: 0;
+    flex-grow: 1;
+}
+
+.search-bar {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    width: 100%;
+    max-width: 300px; /* Limit search bar width on larger screens */
+}
+
+/* Additional Modal Styles */
+.modal-content p {
+    margin: 0 0 15px 0;
+}
+.modal-content p strong {
+    font-weight: 600;
+}
