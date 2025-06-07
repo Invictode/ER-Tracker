@@ -19,6 +19,8 @@
             <button id="nav-admitted" class="nav-btn">Admitted</button>
             <button id="nav-transfer" class="nav-btn">Transfer</button>
             <button id="nav-lama" class="nav-btn">LAMA/DOR</button>
+            <!-- Add this button inside the <nav> in index.html -->
+<button id="nav-stats" class="nav-btn">Statistics</button>
             <button id="sign-out-btn" class="nav-btn sign-out">Sign Out</button>
         </nav>
     </header>
@@ -87,7 +89,48 @@
             </table>
         </div>
     </div>
+<!-- Add this new view container before the modals in index.html -->
+<div id="stats-view" class="view-container" style="display: none;">
+    <h2>Last 24 Hours Report</h2>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Patients Seen</h3>
+            <p id="stats-total" class="stat-number">0</p>
+        </div>
+        <div class="stat-card">
+            <h3>Currently in ER</h3>
+            <p id="stats-current" class="stat-number">0</p>
+        </div>
+        <div class="stat-card">
+            <h3>Admitted</h3>
+            <p id="stats-admitted" class="stat-number">0</p>
+        </div>
+        <div class="stat-card">
+            <h3>Discharged</h3>
+            <p id="stats-discharged" class="stat-number">0</p>
+        </div>
+    </div>
 
+    <h3>Current Patients by Zone</h3>
+    <div class="stats-grid">
+         <div class="stat-card resus-zone">
+            <h3>Resus Zone</h3>
+            <p id="stats-resus" class="stat-number">0</p>
+        </div>
+         <div class="stat-card red-zone">
+            <h3>Red Zone</h3>
+            <p id="stats-red" class="stat-number">0</p>
+        </div>
+         <div class="stat-card yellow-zone">
+            <h3>Yellow Zone</h3>
+            <p id="stats-yellow" class="stat-number">0</p>
+        </div>
+         <div class="stat-card holding-bay">
+            <h3>Holding Bay</h3>
+            <p id="stats-holding" class="stat-number">0</p>
+        </div>
+    </div>
+</div>
     <!-- MODALS -->
     <!-- Patient Info Modal -->
     <div id="patient-modal" class="modal">
@@ -97,12 +140,14 @@
             <form id="patient-form">
                 <input type="hidden" id="modal-bed-id">
                 <label for="patient-name">Name:</label><input type="text" id="patient-name" required>
+                <label for="hospital-number">Hospital Number:</label><input type="text" id="hospital-number" required>
                 <label for="patient-id">ID Card Number:</label><input type="text" id="patient-id">
                 <label for="assigned-nurse">Assigned Nurse:</label><input type="text" id="assigned-nurse">
                 <label for="assigned-doctor">Assigned Doctor:</label><input type="text" id="assigned-doctor">
                 <label for="diagnosis">Diagnosis:</label><input type="text" id="diagnosis">
                 <label for="plan">Plan:</label><textarea id="plan" rows="3"></textarea>
                 <button type="submit">Save Patient</button>
+                <button type="button" id="bed-transfer-btn" class="secondary-btn">Bed Transfer</button>
             </form>
         </div>
     </div>
@@ -136,7 +181,19 @@
             </form>
         </div>
     </div>
-
+<div id="bed-transfer-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Bed Transfer</h2>
+            <form id="bed-transfer-form">
+                <p>Transferring patient: <strong id="transfer-patient-name-display"></strong></p>
+                <input type="hidden" id="transfer-patient-id-input">
+                <label for="vacant-beds-select">Select a Vacant Bed:</label>
+                <select id="vacant-beds-select" required></select>
+                <button type="submit">Confirm Transfer</button>
+            </form>
+        </div>
+    </div>
     <!-- SCRIPT TAGS -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
