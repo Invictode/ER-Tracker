@@ -50,6 +50,11 @@ function initializeApp() {
     const navButtons = {};
     const tableBodies = {};
     const searchBars = {};
+    const statsNav = {
+        prevDay: document.getElementById('stats-prev-day'),
+        nextDay: document.getElementById('stats-next-day'),
+        dateDisplay: document.getElementById('stats-date-display')
+    };
 
     ['board', 'discharged', 'admitted', 'transfer', 'lama', 'stats'].forEach(key => {
         views[key] = document.getElementById(`${key}-view`) || document.getElementById('er-board');
@@ -60,14 +65,15 @@ function initializeApp() {
         }
     });
 
-    // --- ER CONFIGURATION & STATE ---
+    // --- STATE MANAGEMENT ---
     const bedsConfig = [ { number: 1, zone: 'resus-zone' }, { number: 2, zone: 'red-zone' }, { number: 3, zone: 'red-zone' }, { number: 4, zone: 'red-zone' }, { number: 5, zone: 'yellow-zone' }, { number: 6, zone: 'yellow-zone' }, { number: 7, zone: 'yellow-zone' }, { number: 8, zone: 'yellow-zone' }, { number: 9, zone: 'yellow-zone' }, { number: 10, zone: 'yellow-zone' }, { number: 11, zone: 'yellow-zone' }, { number: 12, zone: 'yellow-zone' }, { number: 13, zone: 'holding-bay' }, { number: 14, zone: 'holding-bay' } ];
     let allData = { active: [], discharged: [], admitted: [], transfer: [], lama: [], };
+    let statsCurrentDate = new Date();
 
     // --- VIEW SWITCHING LOGIC ---
     function showView(viewName) {
         if (viewName === 'stats') {
-            calculateAndDisplayStats();
+            updateStatsForDate();
         }
         Object.values(views).forEach(view => { if(view) view.style.display = 'none' });
         Object.values(navButtons).forEach(btn => { if(btn) btn.classList.remove('active') });
@@ -76,33 +82,72 @@ function initializeApp() {
     }
 
     // --- STATISTICS CALCULATION ---
-    function calculateAndDisplayStats() {
-        const now = new Date();
-        const twentyFourHoursAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-        const filterLast24Hours = (list, timeField) => list.filter(item => new Date(item[timeField]) > twentyFourHoursAgo).length;
+    function updateStatsForDate() {
+        const localDate = new Date(statsCurrentDate.getTime());
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        localDate.setHours(0,0,0,0);
 
-        const admittedCount = filterLast24Hours(allData.admitted, 'admissionTime');
-        const dischargedCount = filterLast24Hours(allData.discharged, 'dischargeTime');
-        const transferCount = filterLast24Hours(allData.transfer, 'transferTime');
-        const lamaCount = filterLast24Hours(allData.lama, 'eventTime');
-        const currentCount = allData.active.length;
-        const totalSeen = currentCount + admittedCount + dischargedCount + transferCount + lamaCount;
+        if(localDate.getTime() === today.getTime()){
+            statsNav.dateDisplay.textContent = 'Today';
+        } else {
+            statsNav.dateDisplay.textContent = localDate.toLocaleDateString('en-CA'); // YYYY-MM-DD format
+        }
         
-        document.getElementById('stats-total').textContent = totalSeen;
-        document.getElementById('stats-current').textContent = currentCount;
-        document.getElementById('stats-admitted').textContent = admittedCount;
-        document.getElementById('stats-discharged').textContent = dischargedCount;
+        statsNav.nextDay.disabled = localDate.getTime() >= today.getTime();
+
+        const getShiftTimestamps = (date) => {
+            const startOfDay = new Date(date);
+            startOfDay.setHours(0, 0, 0, 0);
+            return {
+                shift3_start: startOfDay,
+                shift1_start: new Date(startOfDay.getTime() + 8 * 60 * 60 * 1000), // 8:00 AM
+                shift2_start: new Date(startOfDay.getTime() + 16 * 60 * 60 * 1000), // 4:00 PM
+                endOfDay: new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000) // 12:00 AM next day
+            };
+        };
+
+        const dailyTimestamps = getShiftTimestamps(localDate);
         
-        const zoneCounts = { 'resus-zone': 0, 'red-zone': 0, 'yellow-zone': 0, 'holding-bay': 0 };
-        allData.active.forEach(patient => {
-            const bed = bedsConfig.find(b => b.number === patient.bedNumber);
-            if (bed) zoneCounts[bed.zone]++;
+        const filterByShift = (list, timeField, start, end) => list.filter(item => {
+            const itemTime = new Date(item[timeField]);
+            return itemTime >= start && itemTime < end;
         });
+
+        const allArchivedTypes = { admissionTime: 'admitted', dischargeTime: 'discharged', transferTime: 'transfer', eventTime: 'lama'};
+
+        const calculateShiftStats = (start, end) => {
+            let total = 0, admitted = 0, discharged = 0;
+            for (const [timeField, type] of Object.entries(allArchivedTypes)) {
+                const shiftData = filterByShift(allData[type], timeField, start, end);
+                total += shiftData.length;
+                if(type === 'admitted') admitted = shiftData.length;
+                if(type === 'discharged') discharged = shiftData.length;
+            }
+            return { total, admitted, discharged };
+        };
+
+        const s1Stats = calculateShiftStats(dailyTimestamps.shift1_start, dailyTimestamps.shift2_start);
+        const s2Stats = calculateShiftStats(dailyTimestamps.shift2_start, dailyTimestamps.endOfDay);
+        const s3Stats = calculateShiftStats(dailyTimestamps.shift3_start, dailyTimestamps.shift1_start);
+
+        document.getElementById('stats-s1-total').textContent = s1Stats.total;
+        document.getElementById('stats-s1-admitted').textContent = s1Stats.admitted;
+        document.getElementById('stats-s1-discharged').textContent = s1Stats.discharged;
+        document.getElementById('stats-s2-total').textContent = s2Stats.total;
+        document.getElementById('stats-s2-admitted').textContent = s2Stats.admitted;
+        document.getElementById('stats-s2-discharged').textContent = s2Stats.discharged;
+        document.getElementById('stats-s3-total').textContent = s3Stats.total;
+        document.getElementById('stats-s3-admitted').textContent = s3Stats.admitted;
+        document.getElementById('stats-s3-discharged').textContent = s3Stats.discharged;
         
-        document.getElementById('stats-resus').textContent = zoneCounts['resus-zone'];
-        document.getElementById('stats-red').textContent = zoneCounts['red-zone'];
-        document.getElementById('stats-yellow').textContent = zoneCounts['yellow-zone'];
-        document.getElementById('stats-holding').textContent = zoneCounts['holding-bay'];
+        const monthStart = new Date(localDate.getFullYear(), localDate.getMonth(), 1);
+        let monthlyTotal = 0;
+        for (const [timeField, type] of Object.entries(allArchivedTypes)) {
+             monthlyTotal += allData[type].filter(item => new Date(item[timeField]) >= monthStart).length;
+        }
+        document.getElementById('stats-monthly-total').textContent = monthlyTotal;
+        document.getElementById('stats-monthly-range').textContent = `Since ${monthStart.toLocaleDateString('default', { month: 'long', year: 'numeric' })}`;
     }
     
     // --- DATA RENDERING FUNCTIONS ---
@@ -144,7 +189,7 @@ function initializeApp() {
             const bedDiv = document.getElementById(`bed-${patient.bedNumber}`);
             if (bedDiv) {
                 bedDiv.classList.remove('vacant');
-                bedDiv.querySelector('.bed-info').innerHTML = `<p><i class="fa-solid fa-user"></i> <strong>Name:</strong> ${patient.name||''}</p><p><i class="fa-solid fa-hashtag"></i> <strong>Hospital #:</strong> ${patient.hospitalNumber||''}</p><p><i class="fa-solid fa-id-card"></i> <strong>ID:</strong> ${patient.idCardNumber||''}</p><p><i class="fa-solid fa-clock"></i> <strong>Arrival:</strong> ${new Date(patient.arrivalTime).toLocaleTimeString()}</p><p><i class="fa-solid fa-user-nurse"></i> <strong>Nurse:</strong> ${patient.assignedNurse||''}</p><p><i class="fa-solid fa-user-doctor"></i> <strong>Doctor:</strong> ${patient.assignedDoctor||''}</p><p><i class="fa-solid fa-file-medical"></i> <strong>Dx:</strong> ${patient.diagnosis||''}</p><p><i class="fa-solid fa-clipboard-list"></i> <strong>Plan:</strong> ${patient.plan||''}</p>`;
+                bedDiv.querySelector('.bed-info').innerHTML = `<p><i class="fa-solid fa-user"></i> <strong>Name:</strong> ${patient.name||''}</p><p><i class="fa-solid fa-cake-candles"></i> <strong>Age:</strong> ${patient.age||''}</p><p><i class="fa-solid fa-hashtag"></i> <strong>Hospital #:</strong> ${patient.hospitalNumber||''}</p><p><i class="fa-solid fa-id-card"></i> <strong>ID:</strong> ${patient.idCardNumber||''}</p><p><i class="fa-solid fa-clock"></i> <strong>Arrival:</strong> ${new Date(patient.arrivalTime).toLocaleTimeString()}</p><p><i class="fa-solid fa-user-nurse"></i> <strong>Nurse:</strong> ${patient.assignedNurse||''}</p><p><i class="fa-solid fa-user-doctor"></i> <strong>Doctor:</strong> ${patient.assignedDoctor||''}</p><p><i class="fa-solid fa-file-medical"></i> <strong>Dx:</strong> ${patient.diagnosis||''}</p><p><i class="fa-solid fa-clipboard-list"></i> <strong>Plan:</strong> ${patient.plan||''}</p>`;
                 bedDiv.querySelector('.action-buttons').innerHTML = `<button class="action-btn discharge" data-patient-id="${patient.id}" title="Discharge"><i class="fa-solid fa-house-medical-circle-check"></i></button><button class="action-btn admit" data-patient-id="${patient.id}" title="Admit"><i class="fa-solid fa-hospital-user"></i></button><button class="action-btn transfer" data-patient-id="${patient.id}" title="Transfer"><i class="fa-solid fa-truck-medical"></i></button><button class="action-btn lama" data-patient-id="${patient.id}" title="Left Against Medical Advice"><i class="fa-solid fa-person-walking-arrow-right"></i> LAMA</button><button class="action-btn dor" data-patient-id="${patient.id}" title="Discharge on Request"><i class="fa-solid fa-person-walking-arrow-right"></i> DOR</button>`;
             }
         });
@@ -159,7 +204,11 @@ function initializeApp() {
         if (!tbody || !items || !renderRowFunc) return;
 
         tbody.innerHTML = '';
-        const filteredItems = items.filter(item => (item.name && item.name.toLowerCase().includes(searchTerm)) || (item.idCardNumber && item.idCardNumber.toLowerCase().includes(searchTerm)) || (item.hospitalNumber && item.hospitalNumber.toLowerCase().includes(searchTerm)));
+        const filteredItems = items.filter(item => 
+            (item.name && item.name.toLowerCase().includes(searchTerm)) || 
+            (item.idCardNumber && item.idCardNumber.toLowerCase().includes(searchTerm)) || 
+            (item.hospitalNumber && item.hospitalNumber.toLowerCase().includes(searchTerm))
+        );
         if (filteredItems.length === 0) {
             const row = document.createElement('tr');
             const colspan = tbody.parentElement.querySelector('thead tr').childElementCount;
@@ -173,11 +222,11 @@ function initializeApp() {
     function getRowRenderer(key) {
         const formatTime = (isoString) => isoString ? new Date(isoString).toLocaleString() : 'N/A';
         switch (key) {
-            case 'discharged': return item => `<td>${item.name}</td><td>${item.hospitalNumber||''}</td><td>${formatTime(item.dischargeTime)}</td><td>${item.diagnosis}</td>`;
-            case 'admitted': return item => `<td>${item.name}</td><td>${item.hospitalNumber||''}</td><td>${formatTime(item.admissionTime)}</td><td>${item.admittedToWard}</td><td>${item.admittedToBed}</td>`;
-            case 'transfer': return item => `<td>${item.name}</td><td>${item.hospitalNumber||''}</td><td>${item.transferredTo}</td><td>${item.transferReason}</td><td>${formatTime(item.transferTime)}</td>`;
-            case 'lama': return item => `<td>${item.name}</td><td>${item.hospitalNumber||''}</td><td>${item.status}</td><td>${formatTime(item.eventTime)}</td><td>${item.diagnosis}</td>`;
-            default: return () => '';
+            case 'discharged': return item => `<td>${item.name}</td><td>${item.age||''}</td><td>${item.hospitalNumber||''}</td><td>${formatTime(item.dischargeTime)}</td><td>${item.diagnosis}</td>`;
+            case 'admitted':   return item => `<td>${item.name}</td><td>${item.age||''}</td><td>${item.hospitalNumber||''}</td><td>${formatTime(item.admissionTime)}</td><td>${item.admissionDiagnosis||''}</td><td>${item.admittedToWard}</td><td>${item.admittedToBed}</td>`;
+            case 'transfer':   return item => `<td>${item.name}</td><td>${item.age||''}</td><td>${item.hospitalNumber||''}</td><td>${item.transferredTo}</td><td>${item.transferReason}</td><td>${formatTime(item.transferTime)}</td>`;
+            case 'lama':       return item => `<td>${item.name}</td><td>${item.age||''}</td><td>${item.hospitalNumber||''}</td><td>${item.status}</td><td>${formatTime(item.eventTime)}</td><td>${item.diagnosis}</td>`;
+            default:           return () => '';
         }
     }
 
@@ -186,13 +235,13 @@ function initializeApp() {
         const createListener = (collection, orderField, key) => {
             db.collection(collection).orderBy(orderField, 'desc').onSnapshot(snapshot => {
                 allData[key] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderList(key);
-                calculateAndDisplayStats();
+                if(key !== 'active') renderList(key);
+                updateStatsForDate();
             }, err => console.error(`Listener error for ${collection}:`, err));
         };
         db.collection('patients').orderBy('bedNumber', 'asc').onSnapshot(snapshot => {
             updateBedsWithData(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-            calculateAndDisplayStats();
+            updateStatsForDate();
         }, err => console.error(`Listener error for patients:`, err));
 
         createListener('discharged_patients', 'dischargeTime', 'discharged');
@@ -220,6 +269,7 @@ function initializeApp() {
             }
             if (patient) {
                 forms.patient.elements['patient-name'].value = patient.name || '';
+                forms.patient.elements['patient-age'].value = patient.age || '';
                 forms.patient.elements['hospital-number'].value = patient.hospitalNumber || '';
                 forms.patient.elements['patient-id'].value = patient.idCardNumber || '';
                 forms.patient.elements['assigned-nurse'].value = patient.assignedNurse || '';
@@ -290,7 +340,17 @@ function initializeApp() {
         e.preventDefault();
         const bedNumber = parseInt(forms.patient.elements['modal-bed-id'].value);
         const patientId = forms.patient.elements['modal-bed-id'].dataset.patientId;
-        const patientData = { bedNumber, name: forms.patient.elements['patient-name'].value, hospitalNumber: forms.patient.elements['hospital-number'].value, idCardNumber: forms.patient.elements['patient-id'].value, assignedNurse: forms.patient.elements['assigned-nurse'].value, assignedDoctor: forms.patient.elements['assigned-doctor'].value, diagnosis: forms.patient.elements['diagnosis'].value, plan: forms.patient.elements['plan'].value };
+        const patientData = {
+            bedNumber,
+            name: forms.patient.elements['patient-name'].value,
+            age: forms.patient.elements['patient-age'].value,
+            hospitalNumber: forms.patient.elements['hospital-number'].value,
+            idCardNumber: forms.patient.elements['patient-id'].value,
+            assignedNurse: forms.patient.elements['assigned-nurse'].value,
+            assignedDoctor: forms.patient.elements['assigned-doctor'].value,
+            diagnosis: forms.patient.elements['diagnosis'].value,
+            plan: forms.patient.elements['plan'].value
+        };
         if (patientId) { db.collection('patients').doc(patientId).update(patientData); } 
         else { patientData.arrivalTime = new Date().toISOString(); db.collection('patients').add(patientData); }
         closeModal('patient');
@@ -301,7 +361,12 @@ function initializeApp() {
         const patientId = forms.admit.elements['admit-patient-id'].value;
         const patient = allData.active.find(p => p.id === patientId);
         if (patient) {
-            const data = { admittedToWard: forms.admit.elements['admit-ward'].value, admittedToBed: forms.admit.elements['admit-bed'].value, admissionTime: new Date().toISOString() };
+            const data = { 
+                admittedToWard: forms.admit.elements['admit-ward'].value, 
+                admittedToBed: forms.admit.elements['admit-bed'].value, 
+                admissionDiagnosis: forms.admit.elements['admit-diagnosis'].value,
+                admissionTime: new Date().toISOString() 
+            };
             db.collection('admitted_patients').add({ ...patient, ...data }).then(() => db.collection('patients').doc(patientId).delete());
         }
         closeModal('admit');
@@ -328,9 +393,19 @@ function initializeApp() {
         closeModal('bedTransfer');
     });
 
+    // Setup Navigation Listeners
     Object.keys(navButtons).forEach(key => { if(navButtons[key]) navButtons[key].addEventListener('click', () => showView(key)); });
     signOutBtn.addEventListener('click', () => auth.signOut().catch(err => console.error("Sign out error:", err)));
     Object.keys(searchBars).forEach(key => { if(searchBars[key]) searchBars[key].addEventListener('input', () => renderList(key)); });
+    
+    statsNav.prevDay.addEventListener('click', () => {
+        statsCurrentDate.setDate(statsCurrentDate.getDate() - 1);
+        updateStatsForDate();
+    });
+    statsNav.nextDay.addEventListener('click', () => {
+        statsCurrentDate.setDate(statsCurrentDate.getDate() + 1);
+        updateStatsForDate();
+    });
     
     // --- INITIAL APP START ---
     drawInitialBedLayout();

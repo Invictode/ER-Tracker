@@ -19,8 +19,7 @@
             <button id="nav-admitted" class="nav-btn">Admitted</button>
             <button id="nav-transfer" class="nav-btn">Transfer</button>
             <button id="nav-lama" class="nav-btn">LAMA/DOR</button>
-            <!-- Add this button inside the <nav> in index.html -->
-<button id="nav-stats" class="nav-btn">Statistics</button>
+            <button id="nav-stats" class="nav-btn">Statistics</button>
             <button id="sign-out-btn" class="nav-btn sign-out">Sign Out</button>
         </nav>
     </header>
@@ -33,12 +32,12 @@
     <div id="discharged-view" class="view-container" style="display: none;">
         <div class="list-header">
             <h2>Discharged Patients</h2>
-            <input type="text" id="search-discharged" class="search-bar" placeholder="Search by name or ID...">
+            <input type="text" id="search-discharged" class="search-bar" placeholder="Search by name, ID, hospital #...">
         </div>
         <div class="table-container">
             <table id="discharged-table">
                 <thead>
-                    <tr><th>Name</th><th>ID Card</th><th>Arrival Time</th><th>Discharge Time</th><th>Final Diagnosis</th></tr>
+                    <tr><th>Name</th><th>Age</th><th>Hospital #</th><th>Discharge Time</th><th>Final Diagnosis</th></tr>
                 </thead>
                 <tbody></tbody>
             </table>
@@ -48,12 +47,12 @@
     <div id="admitted-view" class="view-container" style="display: none;">
         <div class="list-header">
             <h2>Admitted Patients</h2>
-            <input type="text" id="search-admitted" class="search-bar" placeholder="Search by name or ID...">
+            <input type="text" id="search-admitted" class="search-bar" placeholder="Search by name, ID, hospital #...">
         </div>
         <div class="table-container">
             <table id="admitted-table">
                  <thead>
-                    <tr><th>Name</th><th>ID Card</th><th>Arrival Time</th><th>Admission Time</th><th>Admitted to Ward</th><th>Admitted to Bed</th></tr>
+                    <tr><th>Name</th><th>Age</th><th>Hospital #</th><th>Admission Time</th><th>Admitting Dx</th><th>Admitted to Ward</th><th>Admitted to Bed</th></tr>
                 </thead>
                 <tbody></tbody>
             </table>
@@ -63,12 +62,12 @@
     <div id="transfer-view" class="view-container" style="display: none;">
         <div class="list-header">
             <h2>Transferred Patients</h2>
-            <input type="text" id="search-transfer" class="search-bar" placeholder="Search by name or ID...">
+            <input type="text" id="search-transfer" class="search-bar" placeholder="Search by name, ID, hospital #...">
         </div>
         <div class="table-container">
             <table id="transfer-table">
                 <thead>
-                    <tr><th>Name</th><th>ID Card</th><th>Transferred To</th><th>Reason for Transfer</th><th>Transfer Time</th></tr>
+                    <tr><th>Name</th><th>Age</th><th>Hospital #</th><th>Transferred To</th><th>Reason</th><th>Transfer Time</th></tr>
                 </thead>
                 <tbody></tbody>
             </table>
@@ -78,61 +77,60 @@
     <div id="lama-view" class="view-container" style="display: none;">
         <div class="list-header">
             <h2>LAMA / DOR Patients</h2>
-            <input type="text" id="search-lama" class="search-bar" placeholder="Search by name or ID...">
+            <input type="text" id="search-lama" class="search-bar" placeholder="Search by name, ID, hospital #...">
         </div>
         <div class="table-container">
             <table id="lama-table">
                 <thead>
-                    <tr><th>Name</th><th>ID Card</th><th>Status</th><th>Time</th><th>Final Diagnosis</th></tr>
+                    <tr><th>Name</th><th>Age</th><th>Hospital #</th><th>Status</th><th>Time</th><th>Final Diagnosis</th></tr>
                 </thead>
                 <tbody></tbody>
             </table>
         </div>
     </div>
-<!-- Add this new view container before the modals in index.html -->
-<div id="stats-view" class="view-container" style="display: none;">
-    <h2>Last 24 Hours Report</h2>
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>Total Patients Seen</h3>
-            <p id="stats-total" class="stat-number">0</p>
+    
+    <!-- ADVANCED STATISTICS VIEW -->
+    <div id="stats-view" class="view-container" style="display: none;">
+        <div class="stats-header">
+            <button id="stats-prev-day" class="stats-nav-btn"><i class="fa-solid fa-chevron-left"></i></button>
+            <h2 id="stats-date-display">Today</h2>
+            <button id="stats-next-day" class="stats-nav-btn"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
-        <div class="stat-card">
-            <h3>Currently in ER</h3>
-            <p id="stats-current" class="stat-number">0</p>
+
+        <h3>Daily Shift Report</h3>
+        <div class="stats-grid shift-grid">
+            <div class="stat-card">
+                <h4>Shift 1 (8am - 4pm)</h4>
+                <p>Patients Seen: <strong id="stats-s1-total">0</strong></p>
+                <p>Admitted: <strong id="stats-s1-admitted">0</strong></p>
+                <p>Discharged: <strong id="stats-s1-discharged">0</strong></p>
+            </div>
+            <div class="stat-card">
+                <h4>Shift 2 (4pm - 12am)</h4>
+                <p>Patients Seen: <strong id="stats-s2-total">0</strong></p>
+                <p>Admitted: <strong id="stats-s2-admitted">0</strong></p>
+                <p>Discharged: <strong id="stats-s2-discharged">0</strong></p>
+            </div>
+            <div class="stat-card">
+                <h4>Shift 3 (12am - 8am)</h4>
+                <p>Patients Seen: <strong id="stats-s3-total">0</strong></p>
+                <p>Admitted: <strong id="stats-s3-admitted">0</strong></p>
+                <p>Discharged: <strong id="stats-s3-discharged">0</strong></p>
+            </div>
         </div>
-        <div class="stat-card">
-            <h3>Admitted</h3>
-            <p id="stats-admitted" class="stat-number">0</p>
-        </div>
-        <div class="stat-card">
-            <h3>Discharged</h3>
-            <p id="stats-discharged" class="stat-number">0</p>
+        
+        <h3>Monthly Overview</h3>
+        <div class="stats-grid">
+             <div class="stat-card">
+                <h3>Total Patients This Month</h3>
+                <p id="stats-monthly-total" class="stat-number">0</p>
+                <small id="stats-monthly-range"></small>
+            </div>
         </div>
     </div>
 
-    <h3>Current Patients by Zone</h3>
-    <div class="stats-grid">
-         <div class="stat-card resus-zone">
-            <h3>Resus Zone</h3>
-            <p id="stats-resus" class="stat-number">0</p>
-        </div>
-         <div class="stat-card red-zone">
-            <h3>Red Zone</h3>
-            <p id="stats-red" class="stat-number">0</p>
-        </div>
-         <div class="stat-card yellow-zone">
-            <h3>Yellow Zone</h3>
-            <p id="stats-yellow" class="stat-number">0</p>
-        </div>
-         <div class="stat-card holding-bay">
-            <h3>Holding Bay</h3>
-            <p id="stats-holding" class="stat-number">0</p>
-        </div>
-    </div>
-</div>
+
     <!-- MODALS -->
-    <!-- Patient Info Modal -->
     <div id="patient-modal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
@@ -140,19 +138,29 @@
             <form id="patient-form">
                 <input type="hidden" id="modal-bed-id">
                 <label for="patient-name">Name:</label><input type="text" id="patient-name" required>
-                <label for="hospital-number">Hospital Number:</label><input type="text" id="hospital-number" required>
+                <div class="form-row">
+                    <div class="form-group age-group">
+                        <label for="patient-age">Age:</label>
+                        <input type="number" id="patient-age">
+                    </div>
+                    <div class="form-group hospital-number-group">
+                        <label for="hospital-number">Hospital Number:</label>
+                        <input type="text" id="hospital-number" required>
+                    </div>
+                </div>
                 <label for="patient-id">ID Card Number:</label><input type="text" id="patient-id">
                 <label for="assigned-nurse">Assigned Nurse:</label><input type="text" id="assigned-nurse">
                 <label for="assigned-doctor">Assigned Doctor:</label><input type="text" id="assigned-doctor">
                 <label for="diagnosis">Diagnosis:</label><input type="text" id="diagnosis">
                 <label for="plan">Plan:</label><textarea id="plan" rows="3"></textarea>
-                <button type="submit">Save Patient</button>
-                <button type="button" id="bed-transfer-btn" class="secondary-btn">Bed Transfer</button>
+                <div class="form-actions">
+                    <button type="submit">Save Patient</button>
+                    <button type="button" id="bed-transfer-btn" class="secondary-btn">Bed Transfer</button>
+                </div>
             </form>
         </div>
     </div>
     
-    <!-- Admit Modal -->
     <div id="admit-modal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
@@ -162,12 +170,12 @@
                 <input type="hidden" id="admit-patient-id">
                 <label for="admit-ward">Admitting Ward:</label><input type="text" id="admit-ward" required>
                 <label for="admit-bed">Bed Number:</label><input type="text" id="admit-bed" required>
+                <label for="admit-diagnosis">Admission Diagnosis:</label><input type="text" id="admit-diagnosis" required>
                 <button type="submit">Confirm Admission</button>
             </form>
         </div>
     </div>
 
-    <!-- Transfer Modal -->
     <div id="transfer-modal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
@@ -181,7 +189,8 @@
             </form>
         </div>
     </div>
-<div id="bed-transfer-modal" class="modal">
+
+    <div id="bed-transfer-modal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
             <h2>Bed Transfer</h2>
@@ -194,6 +203,7 @@
             </form>
         </div>
     </div>
+
     <!-- SCRIPT TAGS -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
